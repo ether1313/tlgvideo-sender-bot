@@ -1,0 +1,17 @@
+app = "tlgvideo-sender-bot"
+primary_region = "sin"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+
+[processes]
+  app = "python tlgvideo_sender_bot.py"
+
+[deploy]
+  strategy = "immediate"
+  max_machines_running = 1
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
