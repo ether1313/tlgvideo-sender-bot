@@ -77,41 +77,42 @@ def show_next_run():
         logger.info(f"⭐ NEXT RUN: {jid} → {t}")
 
 # ================================================================
-# DAILY SCHEDULE (BUILD TODAY ALWAYS)
+# DAILY SCHEDULE
 # ================================================================
 def build_daily_schedule():
-    logger.info("🔄 Building schedule for today…")
-    scheduler.remove_all_jobs()
+    logger.info("🔄 Rebuilding today's schedule…")
 
-    weekday = datetime.datetime.now(MY_TZ).weekday()  # 0=Mon ... 6=Sun
+    # Remove all jobs except daily reload
+    for job in scheduler.get_jobs():
+        if job.id != "daily_reload":
+            scheduler.remove_job(job.id)
 
-    # Monday, Wednesday, Friday → Group A
-    if weekday in [0, 2, 4]:
-        selected = GROUP_A
-    else:
-        selected = GROUP_B
+    now = datetime.datetime.now(MY_TZ)
+    weekday = now.weekday()  # Monday=0 ... Sunday=6
 
-    logger.info(f"📌 Today weekday={weekday} → Using group: {selected}")
+    # Decide group
+    selected = GROUP_A if weekday in [0, 2, 4] else GROUP_B
+    logger.info(f"📌 Today weekday={weekday} → Using: {selected}")
 
     start_hour = 8
 
     for i, name in enumerate(selected):
         msg_id = VIDEO_MAP[name]
-        hour = start_hour + i * 2
+        hour = start_hour + i * 2  # every 2 hours
 
-        # Cross-day handling
-        if hour >= 24:
-            hour -= 24
-            day = (weekday + 1) % 7
+        if hour < 24:
+            # Same day schedule
+            run_time = now.replace(hour=hour, minute=0, second=0, microsecond=0)
         else:
-            day = weekday
+            # Cross day schedule (Group B)
+            next_day = now + datetime.timedelta(days=1)
+            run_time = next_day.replace(hour=hour - 24, minute=0, second=0, microsecond=0)
 
+        # Add exact time job
         scheduler.add_job(
             forward_once,
-            trigger="cron",
-            hour=hour,
-            minute=0,
-            day_of_week=str(day),
+            trigger="date",
+            run_date=run_time,
             args=[msg_id],
             id=name,
             replace_existing=True
@@ -120,7 +121,7 @@ def build_daily_schedule():
     show_next_run()
 
 # ================================================================
-# DAILY RELOAD (04:00)
+# DAILY RELOAD at 04:00
 # ================================================================
 def setup_daily_reload():
     scheduler.add_job(
@@ -131,7 +132,7 @@ def setup_daily_reload():
         id="daily_reload",
         replace_existing=True
     )
-    logger.info("🔁 Daily reload at 04:00 configured")
+    logger.info("🔁 Daily reload set at 04:00 (MY time)")
 
 # ================================================================
 # MAIN
@@ -139,21 +140,19 @@ def setup_daily_reload():
 async def main():
     logger.info("🚀 Bot started...")
 
-    now = datetime.datetime.now(MY_TZ)
-    if now.hour >= 4:
-        logger.info("⏱️ Bot started after 04:00 → Rebuilding today's schedule now")
-        build_daily_schedule()
-    else:
-        logger.info("⏱️ Bot started before 04:00 → Today's schedule will run normally")
-        build_daily_schedule()
+    scheduler.remove_all_jobs()
+
+    logger.info("🔧 Initial build")
+    build_daily_schedule()
 
     setup_daily_reload()
+
     scheduler.start()
 
     try:
         await asyncio.Event().wait()
     except asyncio.CancelledError:
-        logger.info("🟡 Shutdown signal received. Exiting cleanly...")
+        logger.info("🟡 Shutdown signal — exiting…")
 
 # RUN BOT
 if __name__ == "__main__":
