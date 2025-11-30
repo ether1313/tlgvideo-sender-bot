@@ -39,9 +39,9 @@ VIDEO_MAP = {
     "spongbob13": 36, "winnie13": 35
 }
 
-GROUP_A = ["ipay9", "bybid9", "bp77", "crown9", "kangaroobet88", "rolex9", "micky13", "bugatti13"]
+GROUP_A = ["ipay9", "bybid9", "bp77", "crown9", "kangaroobet88", "rolex9", "micky13", "bugatti13", "winnie13"]
 GROUP_B = ["kingbet9", "me99", "gucci9", "pokemon13", "mrbean9",
-           "novabet13", "xpay33", "queen13", "spongbob13", "winnie13"]
+           "novabet13", "xpay33", "queen13", "spongbob13"]
 
 TARGET_CHANNELS = ["@tpaaustralia"]
 
@@ -90,25 +90,32 @@ def build_daily_schedule():
     now = datetime.datetime.now(MY_TZ)
     weekday = now.weekday()  # Monday=0 ... Sunday=6
 
-    # Decide group
-    selected = GROUP_A if weekday in [0, 2, 4] else GROUP_B
-    logger.info(f"📌 Today weekday={weekday} → Using: {selected}")
+    # ========================================================
+    # Only run on Monday (Group A) and Friday (Group B)
+    # ========================================================
+    if weekday == 0:
+        selected = GROUP_A
+        logger.info(f"📌 Today = Monday → Using Group A: {selected}")
+    elif weekday == 4:
+        selected = GROUP_B
+        logger.info(f"📌 Today = Friday → Using Group B: {selected}")
+    else:
+        logger.info(f"⛔ Today weekday={weekday}. Not Monday/Friday → No schedule created.")
+        show_next_run()
+        return
 
     start_hour = 8
 
     for i, name in enumerate(selected):
         msg_id = VIDEO_MAP[name]
-        hour = start_hour + i * 2  # every 2 hours
+        hour = start_hour + i * 2
 
         if hour < 24:
-            # Same day schedule
             run_time = now.replace(hour=hour, minute=0, second=0, microsecond=0)
         else:
-            # Cross day schedule (Group B)
             next_day = now + datetime.timedelta(days=1)
             run_time = next_day.replace(hour=hour - 24, minute=0, second=0, microsecond=0)
 
-        # Add exact time job
         scheduler.add_job(
             forward_once,
             trigger="date",
