@@ -34,7 +34,7 @@ scheduler = AsyncIOScheduler(timezone=MY_TZ)
 VIDEO_MAP = {
     "ipay9": 25, "bybid9": 31, "bp77": 27, "crown9": 39,
     "kangaroobet88": 40, "rolex9": 30, "micky13": 34, "bugatti13": 42,
-    "kingbet9": 26, "me99": 28, "gucci9": 29, "pokemon13": 33,
+    "kingbet9": 26, "me99": 28, "gucci9": 43, "pokemon13": 33,
     "mrbean9": 32, "novabet13": 41, "xpay33": 38, "queen13": 37,
     "spongbob13": 36, "winnie13": 35
 }
