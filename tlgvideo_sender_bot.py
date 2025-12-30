@@ -34,12 +34,12 @@ scheduler = AsyncIOScheduler(timezone=MY_TZ)
 # ================================================================
 VIDEO_MAP = {
     "ipay9": 25, "bybid9": 31, "bp77": 27, "crown9": 39, "kangaroobet88": 40,
-    "rolex9": 30, "micky13": 34, "bugatti13": 42, "winnie13": 35, "cosmojack": 44,
+    "rolex9": 30, "micky13": 34, "winnie13": 35, "cosmojack": 44,
     "kingbet9": 26, "me99": 28, "gucci9": 43, "pokemon13": 33, "mrbean9": 32,
     "novabet13": 41, "xpay33": 38, "queen13": 37, "spongbob13": 36
 }
 
-GROUP_A = ["ipay9", "bybid9", "bp77", "crown9", "kangaroobet88", "rolex9", "micky13", "bugatti13", "winnie13", "cosmojack"]
+GROUP_A = ["ipay9", "bybid9", "bp77", "crown9", "kangaroobet88", "rolex9", "micky13", "winnie13", "cosmojack"]
 GROUP_B = ["kingbet9", "me99", "gucci9", "pokemon13", "mrbean9", "novabet13", "xpay33", "queen13", "spongbob13"]
 
 TARGET_CHANNELS = ["@tpaaustralia"]
